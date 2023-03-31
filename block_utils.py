@@ -10,6 +10,7 @@ URI_ETH_NODE = "https://eth-mainnet.alchemyapi.io/v2/GNauZOAEhjOc34zQQqQuXorOlmC
 URI_ETH2USD = "https://min-api.cryptocompare.com/data/pricehistorical?fsym=ETH&tsyms=USD"
 
 w3 = Web3(Web3.HTTPProvider(URI_ETH_NODE))
+# big enough green pool aiming to handle all txs in a block
 pool = eventlet.GreenPool(512)
 
 
