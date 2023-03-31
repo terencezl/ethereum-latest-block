@@ -39,7 +39,6 @@ def get_latest_block(block_number="latest"):
     logger.debug(f"Timestamp: {ts_iso} Block Number: {bn} Price: {price_at_ts}")
 
     payload["txs"] = []
-    # nul_to_addr = None
     for tx in pool.imap(w3.eth.get_transaction, latest_block["transactions"]):
         # sometimes "to" field could be None
         # need to investigate but handle broardly here for now
@@ -52,18 +51,5 @@ def get_latest_block(block_number="latest"):
             "amt_eth": f"{amt_eth:20f}",
             "amt_usd": f"{amt_usd:20f}"
         })
-        # logger.info(f"From: {tx.get('from', ' ' * 42)} To: {tx.get('to', ' ' * 42)} Value: {amt_eth:20f} ETH Value: {amt_usd:20f} USD")
-        # if tx.get('to', None) is None:
-        #     nul_to_addr = tx.get('to', " " * 42)
-
-    # if nul_to_addr:
-    #     logger.warning("Found null address in latest block. Investigate!")
 
     return payload
-
-
-if __name__ == "__main__":
-    # for i in range(16944200, 16944244):
-    #     logger.info(f"Getting block {i}...")
-    #     get_latest_block(i)
-    pass
