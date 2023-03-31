@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.js"></script>
+    <script>
+        function addMessage(message, color) {
+            var text = document.createTextNode(message),
+                el = document.createElement('pre'),
+                messages = document.getElementById('latest-block');
+            el.appendChild(text);
+            el.style.color = color;
+            messages.appendChild(el);
+        }
+
+        function clear() {
+            var messages = document.getElementById('latest-block');
+            messages.innerHTML = "";
+        }
+
+        var socket = io.connect();
+        socket.on('connect', function() {
+            socket.emit('get_latest_block');
+        });
+
+        socket.on('latest_block', function(data) {
+            clear();
+            var header = "Block " + data["bn"] + " | Timestamp " + data["ts"] + " | Price " + data["price"];
+            addMessage(header, "blue");
+            for (var i = 0; i < data["txs"].length; i++) {
+                var tx = data["txs"][i];
+                var tx_str = "From " + tx["addr_from"] + " | To " + tx["addr_to"] + " | ETH " + tx["amt_eth"] + " | USD " + tx["amt_usd"];
+                addMessage(tx_str, "black");
+            }
+        });
+
+    </script>
+</head>
+<body>
+    <h1>Latest Block</h1>
+    <div id="latest-block"></div>
+</body>
