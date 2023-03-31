@@ -28,6 +28,12 @@ class BlockUtils:
         latest_block = self.w3.eth.get_block("latest")
         return latest_block["number"]
 
+    def get_transaction(self, tx):
+        try:
+            return self.w3.eth.get_transaction(tx)
+        except Exception as e:
+            logger.error(f"Error getting transaction {tx}: {e}")
+
     def get_latest_block(self, block_number="latest"):
         """Get latest block info with all transactions.
 
@@ -64,6 +70,9 @@ class BlockUtils:
 
         payload["txs"] = []
         for tx in self.pool.imap(self.w3.eth.get_transaction, latest_block["transactions"]):
+            if tx is None:
+                continue
+
             # sometimes "to" field could be None
             # need to investigate but handle broadly here for now
             amt_eth = self.w3.from_wei(tx["value"], "ether")
