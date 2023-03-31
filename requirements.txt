@@ -1,0 +1,7 @@
+loguru
+tenacity
+web3
+requests
+flask-socketio
+eventlet
+uvicorn[standard]

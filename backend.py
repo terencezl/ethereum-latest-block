@@ -1,24 +1,34 @@
 import eventlet
+
 eventlet.monkey_patch()
 import argparse
+from loguru import logger
 from flask import Flask, request
 from flask.templating import render_template
 from flask_socketio import SocketIO, emit
-from loguru import logger
-from block_utils import check_latest_block, get_latest_block
+from block_utils import BlockUtils
+
+URI_ETH_NODE = "https://eth-mainnet.alchemyapi.io/v2/GNauZOAEhjOc34zQQqQuXorOlmC6wJ6W"
+URI_ETH2USD = "https://min-api.cryptocompare.com/data/pricehistorical?fsym=ETH&tsyms=USD"
+
+# big enough pool aiming to concurrently handle all txs in a block
+block_utils = BlockUtils(URI_ETH_NODE, URI_ETH2USD, 512)
 
 # this is a global variable to store the latest block
 # no matter how many clients are connected, fetch once
 global_payload = None
 
+
 def global_ticker():
     global global_payload
     last_bn = -1
     while True:
-        latest_bn = check_latest_block()
+        # blocks update every 12 seconds, so 1s is generally OK.
+        # TODO: use websocket to low-latency source to get notified of new block without polling
+        latest_bn = block_utils.check_latest_block()
         if latest_bn > last_bn:
             logger.info(f"New block [{latest_bn}] found.")
-            global_payload = get_latest_block(latest_bn)
+            global_payload = block_utils.get_latest_block(latest_bn)
             last_bn = global_payload["bn"]
         else:
             eventlet.sleep(1)
@@ -55,12 +65,15 @@ def handle_get_latest_block():
 
     last_bn = -1
     while True:
+        # another polling loop
+        # TODO: attach a short queue for each client to get notified of new block without polling
         if session_id not in session_ids:
-            logger.info(f"Client [{session_id}] already disconnected. Stopping loop.")
+            logger.info(f"Client [{session_id}] already disconnected. Stop looping.")
             break
 
         if global_payload is None:
-            eventlet.sleep(1)
+            # start condiition, wait for the first block
+            eventlet.sleep(0.1)
             continue
 
         latest_bn = global_payload["bn"]
@@ -81,4 +94,6 @@ if __name__ == "__main__":
     # start the global ticker
     eventlet.spawn(global_ticker)
 
+    # start the server
+    # TODO: use uvicorn to serve multiple workers
     socketio.run(app, host=args.host, port=args.port)
