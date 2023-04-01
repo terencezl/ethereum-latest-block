@@ -10,7 +10,7 @@ We actively poll the latest block info from the Ethereum blockchain every 1s, pu
 
 Within each block, there are a few hundred transactions. We use a green thread pool to fetch the transaction info in parallel and then aggregate the results to display on the web page. The number of threads can be configured to scale with the number of transactions in a block to keep up with the latency requirements.
 
-There is only one "global" fetcher that does the necessary work only once. All clients will simply see the same view of it. Therefore, the number of clients can be scaled with minimal resource consumption.
+There is only one "global" fetcher that does the necessary work once. All clients will simply see the same view of it. Therefore, the number of clients can be scaled with minimal resource consumption.
 
 Note for a simple demo like this, we could process everything on the frontend with a Javascript framework, or WebAssembly. However, we use a backend to provide more extensibility and flexibility for future development.
 
@@ -39,7 +39,7 @@ Now open your browser and go to http://localhost:5001. You can open multiple win
 
 Here is a demo screenshot:
 
-![img](demo.png){: style="width: 90%;max-width:600px" }
+![img](demo.png)
 
 ## Future Work
 
